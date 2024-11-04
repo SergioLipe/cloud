@@ -1,18 +1,17 @@
-# Step 1: Use the official PHP image with Apache
-FROM php:8.1-apache
+# syntax=docker/dockerfile:1
+FROM golang:1.23
+WORKDIR /src
+COPY <<EOF ./main.go
+package main
 
-# Step 2: Set the working directory in the container
-WORKDIR /var/www/html
+import "fmt"
 
-# Step 3: Copy the PHP application files to the container
-COPY . .
+func main() {
+  fmt.Println("hello, world")
+}
+EOF
+RUN go build -o /bin/hello ./main.go
 
-# Step 4: Install any additional PHP extensions, if needed
-# Uncomment and adjust the following line to install extensions
-# RUN docker-php-ext-install mysqli pdo pdo_mysql
-
-# Step 5: Expose port 80 to access the app
-EXPOSE 80
-
-# Step 6: Start Apache in the foreground
-CMD ["apache2-foreground"]
+FROM scratch
+COPY --from=0 /bin/hello /bin/hello
+CMD ["/bin/hello"]
